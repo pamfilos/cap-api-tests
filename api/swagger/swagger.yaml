@@ -1,0 +1,938 @@
+swagger: "2.0"
+info:
+  version: "0.0.2"
+  title: CERN Analysis Preservation API
+# during dev, should point to your local machine
+host: pammbp.cern.ch:5000
+# basePath prefixes all resource paths 
+basePath: /api
+# 
+schemes:
+  # tip: remove http to make production-grade
+  - http
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+securityDefinitions:
+  access_token:
+    type: apiKey
+    name: access_token
+    in: query
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+paths:
+  /deposits/:
+    # binds a127 app logic to a route
+    # x-swagger-router-controller: hello_world
+    get:
+      description: Returns user deposits
+      # used as the method name of the controller
+      operationId: deposits
+      security:
+        - access_token: []
+      responses:
+        200:
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/DepositListResponse"
+
+            # $ref: "#/definitions/CommomErrors"
+        401:
+          description: Not Authorized
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/ErrorResponse"
+        403:
+          description: Permission Required
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/ErrorResponse"
+        404:
+          description: Not Found
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/ErrorResponse"
+        # responses may fall through to errors
+        # default:
+        #   description: Error
+        #   schema:
+        #     $ref: "#/definitions/ErrorResponse"
+  /deposits/{depid}/:
+    # binds a127 app logic to a route
+    # x-swagger-router-controller: hello_world
+    get:
+      description: Returns 'Hello' to the caller
+      # used as the method name of the controller
+      operationId: deposits_item
+      security:
+        - access_token: []
+      parameters:
+        - name: depid
+          in: path
+          description: The ID of the deposit record
+          type: string
+          required: true
+      responses:
+        "200":
+          description: Success
+          schema:
+            # a pointer to a definition
+            $ref: "#/definitions/HelloWorldResponse"
+        # responses may fall through to errors
+        # default:
+        #   description: Error
+        #   schema:
+        #     $ref: "#/definitions/ErrorResponse"
+# complex objects have schema definitions
+definitions:
+  CMSAnalysis:
+    properties:
+      additional_resources:
+        description: Please provide information about the additional resources of the
+          analysis
+        properties:
+          documentations:
+            description: Please provide all documentation
+            items:
+              description: Add documentation
+              properties:
+                cadi_id:
+                  title: CADI ID
+                  type: string
+                comment:
+                  title: Comment
+                  type: string
+                keywords:
+                  title: Keywords
+                  type: string
+                url:
+                  title: URL
+                  type: string
+              title: Documentation
+              type: object
+            title: Additional Documentations
+            type: array
+          internal_discussions:
+            description: Please add all internal discussions\
+            items:
+              properties:
+                url:
+                  title: URL
+                  type: string
+              title: Internal Discussion
+              type: object
+            title: Internal Discussions
+            type: array
+          keywords:
+            description: Please add keywords here
+            title: Keywords
+            type: string
+          presentations:
+            description: Please add all presentations
+            items:
+              properties:
+                url:
+                  title: URL
+                  type: string
+              title: Presentation
+              type: object
+            title: Presentations
+            type: array
+          publications:
+            description: Please add all publications
+            items:
+              description: Add publications
+              properties:
+                journal_issue:
+                  title: Journal Issue
+                  type: integer
+                journal_page:
+                  title: Journal Page
+                  type: integer
+                journal_title:
+                  title: Journal Title
+                  type: string
+                journal_volume:
+                  title: Journal Volume
+                  type: integer
+                journal_year:
+                  title: Journal Year
+                  type: integer
+                persistent_identifiers:
+                  items:
+                    description: An issued identifier
+                    properties:
+                      identifier:
+                        title: Identifier
+                        type: string
+                      scheme:
+                        title: Scheme
+                        type: string
+                    title: Identifier
+                    type: object
+                  title: Identifiers
+                  type: array
+              title: Internal Publication
+              type: object
+            title: Publications
+            type: array
+        title: Additional Resources
+        type: object
+      auxiliary_measurements:
+        default:
+        - {}
+        description: Please provide information about the additional measurements included
+          in your analysis concerning e.g. Trigger Efficiencies, Background Measurements,
+          Systematic Uncertainties, MC Scale Factors, Object Efficiencies, Rates, Acceptance
+          Corrections
+        items:
+          properties:
+            "$ref":
+              type: string
+            type:
+              enum:
+              - trigger_efficiencies
+              - background_measurements
+              - systematic_uncertainties
+              - mc_scale_factors
+              - object_efficiencies
+              - rates
+              - acceptance_corrections
+              - other
+              title: Type
+              type: string
+          type: object
+        title: Auxiliary Measurement Workflow
+        type: array
+      basic_info:
+        description: Please provide some information relevant for all parts of the Analysis here
+        properties:
+          abstract:
+            title: Abstract
+            type: string
+          analysis_number:
+            title: Analysis Number
+            type: string
+          conclusion:
+            title: Conclusion
+            type: string
+          os:
+            description: Please provide information about your operation system
+            properties:
+              name:
+                title: Name
+                type: string
+              version:
+                title: Version
+                type: string
+            title: Operation System
+            type: object
+          people_info:
+            description: Please provide information about the people involved
+            items:
+              properties:
+                email:
+                  title: Email-Adresses
+                  type: string
+                name:
+                  title: Name
+                  type: string
+              type: object
+            title: People Involved
+            type: array
+          software:
+            description: Please provide a software description
+            properties:
+              global_tag_MC:
+                title: Global Tag MC
+                type: string
+              global_tag_data:
+                title: Global Tag Data
+                type: string
+              name:
+                title: Name
+                type: string
+              version:
+                title: Version
+                type: string
+            title: Analysis Software
+            type: object
+        title: Basic Information
+        type: object
+      cms_questionnaire:
+        properties:
+          "$ref":
+            type: string
+        title: CMS Questionnaire
+        type: object
+      input_code_output:
+        description: Please provide the n-tuples you used for your measurements
+        items:
+          properties:
+            code_base:
+              description: Provide user code
+              properties:
+                revision_id:
+                  title: Revision Identifier
+                  type: string
+                tag:
+                  title: Tag
+                  type: string
+                url:
+                  title: URL
+                  type: string
+              title: User Code Base
+              type: object
+            n_tuple:
+              items:
+                properties:
+                  input_data:
+                    properties:
+                      dataset:
+                        title: Dataset
+                        type: string
+                    title: Input
+                    type: object
+                  output_data:
+                    properties:
+                      url:
+                        title: URL
+                        type: string
+                    title: Output
+                    type: object
+                  run_instructions:
+                    description: Provide run instructions
+                    properties:
+                      type:
+                        enum:
+                        - readme
+                        - makefile
+                        - upload
+                        title: Type
+                        type: string
+                    title: Run Instructions
+                    type: object
+                  user_code:
+                    properties:
+                      config_files:
+                        title: URL
+                        type: string
+                    title: Configuration File
+                    type: object
+                title: Input
+                type: object
+              title: Processing
+              type: array
+          type: object
+        title: n-tuple Production
+        type: array
+      input_data:
+        description: Please list all datasets relevant for the Analysis here (including
+          all datasets for all main and auxiliary measurements)
+        properties:
+          mc_bg_dataset:
+            description: Please list all Monte Carlo Background datasets
+            title: Monte Carlo Background Datasets
+            type: string
+          mc_sig_dataset:
+            description: Please list all Monte Carlo Signal datasets
+            title: Monte Carlo Signal Datasets
+            type: string
+          primary_dataset:
+            description: Please list all primary datasets here
+            title: Primary Datasets
+            type: string
+        title: Input Data
+        type: object
+      main_measurements:
+        description: Please provide information about the main measurements of your analysis
+        items:
+          description: Information concerning the state of the detector
+          properties:
+            ana_note_number:
+              title: Analysis Note Number
+              type: string
+            code_base:
+              properties:
+                key:
+                  type: string
+                source:
+                  properties:
+                    preserved:
+                      title: Preserve files from URL?
+                      type: boolean
+                    url:
+                      type: string
+                  title: URL
+                  type: object
+                version_id:
+                  type: string
+              type: object
+            detailed_measurement_description:
+              title: Description Details
+              type: string
+            detector_final_state:
+              properties:
+                final_state_particles:
+                  items:
+                    properties:
+                      bjet_discriminator:
+                        properties:
+                          custom_tag:
+                            type: string
+                          tag:
+                            enum:
+                              - trackCountingHighPurBJetTags
+                              - trackCountingHighEffBJetTags
+                              - simpleSecondaryVertexHighEffBJetTags
+                              - combinedSecondaryVertexBJetTags
+                              - jetProbabilityBJetTags
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      electron_discriminator:
+                        properties:
+                          custom_tag:
+                            type: string
+                          tag:
+                            enum:
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      electron_type:
+                        enum:
+                          - GsfElectron
+                        title: Electron type
+                        type: string
+                      eta_cut:
+                        items:
+                          properties:
+                            number:
+                              enum:
+                                - '1.1'
+                                - '1.5'
+                                - '2.4'
+                                - '2.5'
+                                - other
+                              type: string
+                            other_number:
+                              pattern: "^[\\d\\.]+$"
+                              type: string
+                            sign:
+                              enum:
+                                - ">"
+                                - "="
+                                - "<"
+                              title: "<, >, ="
+                              type: string
+                          type: object
+                        title: "|η| Cuts"
+                        type: array
+                      isolation:
+                        properties:
+                          calorimeter:
+                            properties:
+                              deltaRs:
+                                pattern: "^[\\d\\.]+$"
+                                title: ΔR <
+                                type: string
+                              pTs:
+                                pattern: "^[\\d\\.]+$"
+                                title: pT <
+                                type: string
+                            title: calorimeter
+                            type: object
+                          notracks:
+                            properties:
+                              deltaRs:
+                                pattern: "^[\\d\\.]+$"
+                                title: ΔR <
+                                type: string
+                              pTg:
+                                pattern: "^[\\d\\.]+$"
+                                title: pT >
+                                type: string
+                            type: object
+                        title: Isolation
+                        type: object
+                      jet_corrections:
+                        enum:
+                          - JetCorrections
+                        title: Jet Corrections
+                        type: string
+                      jet_discriminator:
+                        properties:
+                          custom_tag:
+                            type: string
+                          tag:
+                            enum:
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            pattern: "^[\\d\\.]+$"
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      jet_type:
+                        enum:
+                          - AK4PF
+                          - AK5PF
+                          - AK6PF
+                          - AK7PF
+                          - AK8PF
+                          - AK4Calo
+                          - AK5Calo
+                          - AK6Calo
+                          - AK7Calo
+                          - AK8Calo
+                          - KT4PF
+                          - KT5PF
+                          - KT6PF
+                          - KT7PF
+                          - KT8PF
+                          - KT4Calo
+                          - KT5Calo
+                          - KT6Calo
+                          - KT7Calo
+                          - KT8Calo
+                        title: Jet type
+                        type: string
+                      met_calo_corrections:
+                        enum:
+                          - Type0CaloCorrections
+                          - Type1CaloCorrections
+                          - Type2CaloCorrections
+                        title: MET Corrections
+                        type: string
+                      met_pf_corrections:
+                        enum:
+                          - Type0PFCorrections
+                          - Type1PFCorrections
+                          - Type2PFCorrections
+                        title: MET Corrections
+                        type: string
+                      met_type:
+                        enum:
+                          - PFMET
+                          - CaloMET
+                        title: MET type
+                        type: string
+                      muon_discriminator:
+                        properties:
+                          custom_tag:
+                            type: string
+                          tag:
+                            enum:
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            pattern: "^[\\d\\.]+$"
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      muon_type:
+                        enum:
+                          - PFMuon
+                          - GlobalMuon
+                          - TrackerMuon
+                        title: Muon type
+                        type: string
+                      number:
+                        properties:
+                          number:
+                            pattern: "^[\\d\\.]+$"
+                            title: Number
+                            type: string
+                          sign:
+                            enum:
+                              - "<"
+                              - ">"
+                              - "="
+                              - "<="
+                              - ">="
+                            title: "<, >, =, <=, >="
+                            type: string
+                        title: Number
+                        type: object
+                      number_tracks:
+                        properties:
+                          number:
+                            pattern: "^[\\d\\.]+$"
+                            title: ">"
+                            type: string
+                        title: Number of Tracks
+                        type: object
+                      number_vertex:
+                        properties:
+                          number:
+                            pattern: "^[\\d\\.]+$"
+                            title: Number
+                            type: string
+                          sign:
+                            enum:
+                              - "="
+                            title: "="
+                            type: string
+                        title: Number
+                        type: object
+                      object:
+                        enum:
+                          - ''
+                          - electron
+                          - muon
+                          - tau
+                          - jet
+                          - bjet
+                          - photon
+                          - track
+                          - vertex
+                          - MET
+                          - HT
+                        title: Object
+                        type: string
+                      photon_discriminator:
+                        properties:
+                          custom_tag:
+                            type: string
+                          tag:
+                            enum:
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            pattern: "^[\\d\\.]+$"
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      photon_type:
+                        enum:
+                          - Photon
+                          - Conversion
+                        title: Photon type
+                        type: string
+                      pt_cut:
+                        items:
+                          properties:
+                            number:
+                              pattern: "^[\\d\\.]+$"
+                              title: GeV
+                              type: string
+                            sign:
+                              default: ">"
+                              enum:
+                                - ">"
+                                - "="
+                                - "<"
+                              title: "<, >, ="
+                              type: string
+                          type: object
+                        title: pT Cuts
+                        type: array
+                      sel_criteria:
+                        enum:
+                          - tight
+                          - medium
+                          - loose
+                          - other
+                        title: Selection Criteria
+                        type: string
+                      tau_discriminator:
+                        properties:
+                          custom_tag:
+                            title: " "
+                            type: string
+                          tag:
+                            enum:
+                              - AgainstElectronLooseMVA
+                              - other
+                            title: Tag
+                            type: string
+                          value:
+                            pattern: "^[\\d\\.]+$"
+                            title: Value
+                            type: string
+                        title: Discriminator
+                        type: object
+                      tau_type:
+                        enum:
+                          - PFTau
+                        title: Tau type
+                        type: string
+                      track_type:
+                        enum:
+                          - Heavy-Ion
+                          - pp
+                        title: Track type
+                        type: string
+                    type: object
+                  title: Physics Objects
+                  type: array
+                # final_state_relations:
+                #   items:
+                #     properties:
+                #       angle_relation:
+                #         pattern: "^[\\d\\.]+$"
+                #         title: Degrees
+                #         type: string
+                #       charge_relation:
+                #         enum:
+                #           - same_sign
+                #           - opposite_sign
+                #         title: Charge
+                #         type: string
+                #       invariant_mass:
+                #         properties:
+                #           lower_range:
+                #             title: "<"
+                #             type: number
+                #           upper_range:
+                #             pattern: "^[\\d\\.]+$"
+                #             title: ">"
+                #             type: string
+                #         title: GeV
+                #         type: object
+                #       physics_objects:
+                #         enum: []
+                #         title: Physics Objects Available
+                #         type: string
+                #       relation_type:
+                #         enum:
+                #           - charge
+                #           - angle
+                #           - invariant_mass
+                #           - transverse_mass
+                #         title: Relation Type
+                #         type: string
+                #       transverse_mass:
+                #         properties:
+                #           lower_range:
+                #             pattern: "^[\\d\\.]+$"
+                #             title: "<"
+                #             type: string
+                #           upper_range:
+                #             pattern: "^[\\d\\.]+$"
+                #             title: ">"
+                #             type: string
+                #         title: GeV
+                #         type: object
+                #     type: object
+                #   title: Relations
+                #   type: array
+                veto:
+                  description: Provide vetos
+                  items:
+                    properties:
+                      eta_cut:
+                        title: ETA
+                        type: string
+                      number:
+                        pattern: "^[\\d\\.]+$"
+                        title: Number
+                        type: string
+                      particle:
+                        enum:
+                          - electron
+                          - muon
+                          - tau
+                          - jet
+                          - bjet
+                          - photon
+                          - track
+                          - vertex
+                          - MET
+                          - HT
+                        title: Physics Object
+                        type: string
+                      pt_cut:
+                        title: PT
+                        type: string
+                    type: object
+                  title: Vetos
+                  type: array
+              title: Event Selection
+              type: object
+            measurement_description:
+              title: Measurement Description
+              type: string
+            n_tuple:
+              items:
+                properties:
+                  input_data:
+                    properties:
+                      dataset:
+                        title: Dataset
+                        type: string
+                    title: Input
+                    type: object
+                  output_data:
+                    properties:
+                      output_url:
+                        title: URL
+                        type: string
+                    title: Output
+                    type: object
+                  run_instructions:
+                    description: Provide run instructions
+                    enum:
+                      - readme
+                      - makefile
+                      - upload
+                    title: Type
+                    type: string
+                  user_code:
+                    properties:
+                      key:
+                        type: string
+                      source:
+                        properties:
+                          preserved:
+                            default: true
+                            title: Preserve files from URL?
+                            type: boolean
+                          url:
+                            pattern: "^(http|https)://"
+                            type: string
+                        title: URL
+                        type: object
+                      version_id:
+                        type: string
+                    type: object
+                    x-cap-file:
+                      condition: "/source/preserved"
+                      fetch_from: "/source/url"
+                      file_key: "/key"
+                title: Input
+                type: object
+              title: Processing
+              type: array
+          title: Detector State
+          type: object
+        title: Main Measurement Workflow
+        type: array
+      post_n_tuple:
+        description: 'Please provide information about the combination of measurements
+          for the final results of your analysis '
+        properties:
+          code_base:
+            description: Provide user code
+            properties:
+              revision_id:
+                title: Revision Identifier
+                type: string
+              tag:
+                title: Tag
+                type: string
+              url:
+                title: URL
+                type: string
+            title: User Code Base
+            type: object
+          n_tuple:
+            items:
+              properties:
+                datacard:
+                  title: Combine Datacard
+                  type: string
+                input_data:
+                  properties:
+                    dataset:
+                      title: Dataset
+                      type: string
+                  title: Input
+                  type: object
+                output_data:
+                  properties:
+                    url:
+                      title: URL
+                      type: string
+                  title: Output
+                  type: object
+                run_instructions:
+                  description: Provide run instructions
+                  properties:
+                    type:
+                      enum:
+                        - readme
+                        - makefile
+                        - upload
+                      title: Type
+                      type: string
+                  title: Run Instructions
+                  type: object
+                user_code:
+                  properties:
+                    config_files:
+                      title: URL
+                      type: string
+                  title: Produced With
+                  type: object
+              title: Input
+              type: object
+            title: Processing
+            type: array
+        title: Final Results
+        type: object
+    title: CMS Record Schema.
+    type: object
+  DepositListResponse:
+    properties:
+      aggregations:
+        type: object
+      hits:
+        type: object
+        properties:
+          hits:
+            type: array
+            items:
+              properties: {}
+      total:
+        type: number
+      links:
+        type: object
+  HelloWorldResponse:
+    required:
+      - message
+    properties:
+      message:
+        type: string
+  ErrorResponse:
+    required:
+      - message
+    properties:
+      status:
+        type: string
+      message:
+        type: string
+  # CommomErrors:
+  #   401:
+  #     description: Not Authorized
+  #     schema:
+  #       # a pointer to a definition
+  #       $ref: "#/definitions/ErrorResponse"
+  #   403:
+  #     description: Permission Required
+  #     schema:
+  #       # a pointer to a definition
+  #       $ref: "#/definitions/ErrorResponse"
+  #   404:
+  #     description: Not Found
+  #     schema:
+  #       # a pointer to a definition
+  #       $ref: "#/definitions/ErrorResponse"
